@@ -33,6 +33,10 @@ contract Election{
         require(isBoard[msg.sender]);
         _;
     }
+    modifier boardMember(address newBoard) {
+        require(isBoard[newBoard]);
+        _;
+    }
     modifier notBoardMember(address newBoard) {
         require(!isBoard[newBoard]);
         _;
@@ -60,6 +64,21 @@ contract Election{
     {
         board.push(newBoard);
         isBoard[newBoard] = true;
+    }
+
+    function removeBoardMember(address toRemove) public
+        onlyBoard()
+        boardMember(toRemove)
+    {
+        isBoard[toRemove] = false;
+        uint256 i = 0;
+        while(board[i] != toRemove){
+            i++;
+        }
+        for(i; i < board.length - 1; i++){
+            board[i] = board[i + 1];
+        }
+        board.pop();
     }
 
     function endVotingRound() public onlyBoard(){
@@ -106,8 +125,8 @@ contract Election{
 
     function getProposals() public view returns (Proposal[] memory currentProposals) {
         currentProposals = new Proposal[](proposalCount);
-        uint256 i;
-        for(i = 0; i < proposalCount; i++){
+        uint256 i = 0;
+        for(i; i < proposalCount; i++){
             currentProposals[i] = proposals[i];
         }
         return currentProposals;
